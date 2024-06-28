@@ -6,11 +6,10 @@ Contains the TestStateDocs classes
 from datetime import datetime
 import inspect
 import models
-from models import state
+from models.state import State
 from models.base_model import BaseModel
-import pep8
+import pycodestyle
 import unittest
-State = state.State
 
 
 class TestStateDocs(unittest.TestCase):
@@ -22,23 +21,23 @@ class TestStateDocs(unittest.TestCase):
 
     def test_pep8_conformance_state(self):
         """Test that models/state.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
+        pep8s = pycodestyle.StyleGuide(quiet=True)
         result = pep8s.check_files(['models/state.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
 
     def test_pep8_conformance_test_state(self):
         """Test that tests/test_models/test_state.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
+        pep8s = pycodestyle.StyleGuide(quiet=True)
         result = pep8s.check_files(['tests/test_models/test_state.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
 
     def test_state_module_docstring(self):
         """Test for the state.py module docstring"""
-        self.assertIsNot(state.__doc__, None,
+        self.assertIsNot(models.state.__doc__, None,
                          "state.py needs a docstring")
-        self.assertTrue(len(state.__doc__) >= 1,
+        self.assertTrue(len(models.state.__doc__) >= 1,
                         "state.py needs a docstring")
 
     def test_state_class_docstring(self):
@@ -68,7 +67,7 @@ class TestState(unittest.TestCase):
         self.assertTrue(hasattr(state, "updated_at"))
 
     def test_name_attr(self):
-        """Test that State has attribute name, and it's as an empty string"""
+        """Test that State has attribute name, and it's an empty string"""
         state = State()
         self.assertTrue(hasattr(state, "name"))
         if models.storage_t == 'db':
@@ -83,7 +82,7 @@ class TestState(unittest.TestCase):
         self.assertEqual(type(new_d), dict)
         self.assertFalse("_sa_instance_state" in new_d)
         for attr in s.__dict__:
-            if attr is not "_sa_instance_state":
+            if attr != "_sa_instance_state":
                 self.assertTrue(attr in new_d)
         self.assertTrue("__class__" in new_d)
 
