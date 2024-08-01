@@ -10,7 +10,9 @@ from unittest import mock
 BaseModel = models.base_model.BaseModel
 module_doc = models.base_model.__doc__
 
-UUID_REGEX = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+UUID_REGEX = (
+    '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+)
 
 
 class TestBaseModelDocs(unittest.TestCase):
@@ -23,8 +25,9 @@ class TestBaseModelDocs(unittest.TestCase):
 
     def test_pep8_conformance(self):
         """Test that models/base_model.py conforms to PEP8."""
-        for path in ['models/base_model.py',
-                     'tests/test_models/test_base_model.py']:
+        for path in [
+                'models/base_model.py', 'tests/test_models/test_base_model.py'
+        ]:
             with self.subTest(path=path):
                 errors = pycodestyle.Checker(path).check_all()
                 self.assertEqual(errors, 0)
@@ -60,6 +63,7 @@ class TestBaseModelDocs(unittest.TestCase):
 
 class TestBaseModel(unittest.TestCase):
     """Test the BaseModel class"""
+
     def test_instantiation(self):
         """Test that object is correctly created"""
         inst = BaseModel()
@@ -83,16 +87,26 @@ class TestBaseModel(unittest.TestCase):
     def test_datetime_attributes(self):
         """Test that two BaseModel instances have different datetime objects
         and that upon creation have identical updated_at and created_at
-        value."""
-        tic = datetime.now()
+        values."""
+        tic = datetime.utcnow()
         inst1 = BaseModel()
-        toc = datetime.now()
-        self.assertTrue(tic <= inst1.created_at <= toc)
-        time.sleep(1e-4)
-        tic = datetime.now()
+        toc = datetime.utcnow()
+        self.assertTrue(
+            tic <= inst1.created_at <= toc,
+            f"Created_at time {inst1.created_at} "
+            f"is not within range {tic} to {toc}"
+        )
+
+        time.sleep(1)  # Sleep for a short time to ensure a difference
+        tic = datetime.utcnow()
         inst2 = BaseModel()
-        toc = datetime.now()
-        self.assertTrue(tic <= inst2.created_at <= toc)
+        toc = datetime.utcnow()
+        self.assertTrue(
+            tic <= inst2.created_at <= toc,
+            f"Created_at time {inst2.created_at} "
+            f"is not within range {tic} to {toc}"
+        )
+
         self.assertEqual(inst1.created_at, inst1.updated_at)
         self.assertEqual(inst2.created_at, inst2.updated_at)
         self.assertNotEqual(inst1.created_at, inst2.created_at)
@@ -115,19 +129,16 @@ class TestBaseModel(unittest.TestCase):
         my_model.name = "Holberton"
         my_model.my_number = 89
         d = my_model.to_dict()
-        expected_attrs = ["id",
-                          "created_at",
-                          "updated_at",
-                          "name",
-                          "my_number",
-                          "__class__"]
+        expected_attrs = [
+            "id", "created_at", "updated_at", "name", "my_number", "__class__"
+        ]
         self.assertCountEqual(d.keys(), expected_attrs)
         self.assertEqual(d['__class__'], 'BaseModel')
         self.assertEqual(d['name'], "Holberton")
         self.assertEqual(d['my_number'], 89)
 
     def test_to_dict_values(self):
-        """test that values in dict returned from to_dict are correct"""
+        """Test that values in dict returned from to_dict are correct"""
         t_format = "%Y-%m-%dT%H:%M:%S.%f"
         bm = BaseModel()
         new_d = bm.to_dict()
@@ -138,15 +149,14 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(new_d["updated_at"], bm.updated_at.strftime(t_format))
 
     def test_str(self):
-        """test that the str method has the correct output"""
+        """Test that the str method has the correct output"""
         inst = BaseModel()
         string = "[BaseModel] ({}) {}".format(inst.id, inst.__dict__)
         self.assertEqual(string, str(inst))
 
     @mock.patch('models.storage')
     def test_save(self, mock_storage):
-        """Test that save method updates `updated_at` and calls
-        `storage.save`"""
+        """Test that save method updates `updated_at` and calls `storage.save`"""
         inst = BaseModel()
         old_created_at = inst.created_at
         old_updated_at = inst.updated_at
@@ -157,3 +167,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(old_created_at, new_created_at)
         self.assertTrue(mock_storage.new.called)
         self.assertTrue(mock_storage.save.called)
+
+
+if __name__ == '__main__':
+    unittest.main()
